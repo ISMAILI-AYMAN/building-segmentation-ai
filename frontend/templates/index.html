@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Building Segmentation{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">
+                    AI-Powered Building Segmentation
+                </h1>
+                <p class="lead mb-4">
+                    Advanced deep learning models for automatic building detection and segmentation from aerial imagery. 
+                    Get accurate results in seconds with our state-of-the-art algorithms.
+                </p>
+                <div class="d-flex gap-3">
+                    <a href="{{ url_for('upload_file') }}" class="btn btn-light btn-lg">
+                        <i class="fas fa-upload me-2"></i>Start Processing
+                    </a>
+                    <a href="{{ url_for('gallery') }}" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-images me-2"></i>View Gallery
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center">
+                <i class="fas fa-building fa-10x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">Key Features</h2>
+                <p class="lead text-muted">Discover what makes our building segmentation system powerful</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-brain fa-3x text-primary"></i>
+                        </div>
+                        <h5 class="card-title">Advanced AI Models</h5>
+                        <p class="card-text">
+                            State-of-the-art deep learning models including U-Net, ResNet, and EfficientNet architectures 
+                            for superior segmentation accuracy.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-bolt fa-3x text-success"></i>
+                        </div>
+                        <h5 class="card-title">Fast Processing</h5>
+                        <p class="card-text">
+                            Optimized inference pipeline with GPU acceleration for quick results. 
+                            Process multiple images in batch for efficiency.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card h-100">
+                    <div class="card-body text-center p-4">
+                        <div class="mb-3">
+                            <i class="fas fa-chart-line fa-3x text-warning"></i>
+                        </div>
+                        <h5 class="card-title">Post-Processing</h5>
+                        <p class="card-text">
+                            Advanced post-processing techniques including morphological operations, 
+                            noise removal, and boundary smoothing for clean results.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <h2 class="fw-bold">How It Works</h2>
+                <p class="lead text-muted">Simple steps to get your building segmentation results</p>
+            </div>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">1</span>
+                    </div>
+                    <h5>Upload Image</h5>
+                    <p class="text-muted">Upload your aerial image in common formats (JPG, PNG, etc.)</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">2</span>
+                    </div>
+                    <h5>Configure Settings</h5>
+                    <p class="text-muted">Adjust threshold, post-processing options, and other parameters</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">3</span>
+                    </div>
+                    <h5>AI Processing</h5>
+                    <p class="text-muted">Our AI models analyze the image and generate segmentation masks</p>
+                </div>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="text-center">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 60px; height: 60px;">
+                        <span class="fw-bold">4</span>
+                    </div>
+                    <h5>Get Results</h5>
+                    <p class="text-muted">Download your results including masks, overlays, and metrics</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="fas fa-images fa-3x text-primary"></i>
+                </div>
+                <h3 class="fw-bold" id="processedImages">1000+</h3>
+                <p class="text-muted">Images Processed</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="fas fa-percentage fa-3x text-success"></i>
+                </div>
+                <h3 class="fw-bold">95%+</h3>
+                <p class="text-muted">Accuracy Rate</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="fas fa-clock fa-3x text-warning"></i>
+                </div>
+                <h3 class="fw-bold">&lt;30s</h3>
+                <p class="text-muted">Average Processing Time</p>
+            </div>
+            
+            <div class="col-md-3">
+                <div class="mb-3">
+                    <i class="fas fa-users fa-3x text-info"></i>
+                </div>
+                <h3 class="fw-bold">500+</h3>
+                <p class="text-muted">Happy Users</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="py-5 bg-primary text-white">
+    <div class="container text-center">
+        <h2 class="fw-bold mb-4">Ready to Get Started?</h2>
+        <p class="lead mb-4">
+            Upload your aerial images and experience the power of AI-driven building segmentation.
+        </p>
+        <a href="{{ url_for('upload_file') }}" class="btn btn-light btn-lg">
+            <i class="fas fa-upload me-2"></i>Start Processing Now
+        </a>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Animate stats on scroll
+    function animateStats() {
+        $('.col-md-3 h3').each(function() {
+            const $this = $(this);
+            const countTo = $this.text();
+            
+            $({ countNum: 0 }).animate({
+                countNum: countTo.replace(/\D/g, '')
+            }, {
+                duration: 2000,
+                easing: 'swing',
+                step: function() {
+                    $this.text(Math.floor(this.countNum) + countTo.replace(/\d/g, ''));
+                },
+                complete: function() {
+                    $this.text(countTo);
+                }
+            });
+        });
+    }
+    
+    // Trigger animation when stats section is visible
+    $(window).scroll(function() {
+        const statsSection = $('.py-5').eq(2);
+        const sectionTop = statsSection.offset().top;
+        const sectionBottom = sectionTop + statsSection.outerHeight();
+        const scrollTop = $(window).scrollTop();
+        const windowHeight = $(window).height();
+        
+        if (scrollTop + windowHeight > sectionTop && scrollTop < sectionBottom) {
+            animateStats();
+            $(window).off('scroll');
+        }
+    });
+</script>
+{% endblock %}

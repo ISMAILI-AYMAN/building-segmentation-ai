@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Building Segmentation</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .result-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .image-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .image-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .metrics-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .download-btn {
+            margin: 5px;
+        }
+        .comparison-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .comparison-item {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-building me-2"></i>
+                Building Segmentation
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">
+                            <i class="fas fa-upload me-1"></i>Upload
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gallery">
+                            <i class="fas fa-images me-1"></i>Gallery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        {% if result %}
+            <!-- Success Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Processing Complete!
+                        </h4>
+                        <p class="mb-0">
+                            Successfully processed <strong>{{ result.filename }}</strong> 
+                            on {{ result.upload_time.split('T')[0] if result.upload_time else 'Unknown' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics Summary -->
+            {% if result.results %}
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="metrics-card">
+                        <h3 class="text-center mb-4">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Segmentation Results
+                        </h3>
+                        <div class="row text-center">
+                            {% if result.results.metrics and result.results.metrics.total_area %}
+                            <div class="col-md-3">
+                                <h4>{{ result.results.metrics.total_area | default('N/A') }}</h4>
+                                <p>Total Area (pixels)</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if result.results.metrics and result.results.metrics.building_area %}
+                            <div class="col-md-3">
+                                <h4>{{ result.results.metrics.building_area | default('N/A') }}</h4>
+                                <p>Building Area (pixels)</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if result.results.metrics and result.results.metrics.building_percentage %}
+                            <div class="col-md-3">
+                                <h4>{{ "%.2f"|format(result.results.metrics.building_percentage | default(0)) }}%</h4>
+                                <p>Building Coverage</p>
+                            </div>
+                            {% endif %}
+                            
+                            {% if result.results.metrics and result.results.metrics.num_buildings %}
+                            <div class="col-md-3">
+                                <h4>{{ result.results.metrics.num_buildings | default('N/A') }}</h4>
+                                <p>Buildings Detected</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Image Results -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card result-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-images me-2"></i>
+                                Generated Images
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="comparison-container">
+                                <!-- Original Image -->
+                                {% if result.results.saved_paths and result.results.saved_paths.original_path %}
+                                <div class="comparison-item">
+                                    <h6>Original Image</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.original_path }}" alt="Original Image" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.original_path }}" download class="btn btn-outline-primary download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Original
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                <!-- Segmentation Mask -->
+                                {% if result.results.saved_paths and result.results.saved_paths.processed_mask_path %}
+                                <div class="comparison-item">
+                                    <h6>Processed Segmentation Mask</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.processed_mask_path }}" alt="Processed Segmentation Mask" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.processed_mask_path }}" download class="btn btn-outline-success download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Processed Mask
+                                    </a>
+                                </div>
+                                {% elif result.results.saved_paths and result.results.saved_paths.mask_path %}
+                                <div class="comparison-item">
+                                    <h6>Segmentation Mask</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.mask_path }}" alt="Segmentation Mask" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.mask_path }}" download class="btn btn-outline-success download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Mask
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                <!-- Overlay Image -->
+                                {% if result.results.saved_paths and result.results.saved_paths.overlay_path %}
+                                <div class="comparison-item">
+                                    <h6>Overlay Result</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.overlay_path }}" alt="Overlay Result" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.overlay_path }}" download class="btn btn-outline-warning download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Overlay
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                <!-- Enhanced Overlay (if post-processing was applied) -->
+                                {% if result.results.saved_paths and result.results.saved_paths.enhanced_overlay_path %}
+                                <div class="comparison-item">
+                                    <h6>Enhanced Overlay</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.enhanced_overlay_path }}" alt="Enhanced Overlay" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.enhanced_overlay_path }}" download class="btn btn-outline-info download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Enhanced Overlay
+                                    </a>
+                                </div>
+                                {% endif %}
+
+                                <!-- Comparison Image (if post-processing was applied) -->
+                                {% if result.results.saved_paths and result.results.saved_paths.comparison_path %}
+                                <div class="comparison-item">
+                                    <h6>Comparison View</h6>
+                                    <div class="image-container">
+                                                                                 <img src="http://127.0.0.1:8000/{{ result.results.saved_paths.comparison_path }}" alt="Comparison View" class="img-fluid">
+                                     </div>
+                                     <a href="http://127.0.0.1:8000/{{ result.results.saved_paths.comparison_path }}" download class="btn btn-outline-secondary download-btn">
+                                        <i class="fas fa-download me-1"></i>Download Comparison
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Metrics -->
+            {% if result.results %}
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="card result-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>
+                                Detailed Metrics
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Processing Information</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Status:</strong> {{ result.status | default('Unknown') }}</li>
+                                        <li><strong>Message:</strong> {{ result.message | default('No message') }}</li>
+                                        <li><strong>Request ID:</strong> {{ result.request_id | default('N/A') }}</li>
+                                        <li><strong>Processing Time:</strong> {{ result.results.processing_time | default('N/A') }} seconds</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Model Information</h6>
+                                    <ul class="list-unstyled">
+                                        <li><strong>Model Type:</strong> {{ result.results.model_type | default('N/A') }}</li>
+                                        <li><strong>Threshold Used:</strong> {{ result.results.threshold | default('N/A') }}</li>
+                                        <li><strong>Post-processing:</strong> {{ result.results.apply_post_processing | default('N/A') }}</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Additional Metrics -->
+                            {% if result.results.metrics %}
+                            <div class="row mt-3">
+                                <div class="col-12">
+                                    <h6>Segmentation Metrics</h6>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <strong>Total Area:</strong> {{ result.results.metrics.total_area | default('N/A') }} pixels
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Building Area:</strong> {{ result.results.metrics.building_area | default('N/A') }} pixels
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Building Percentage:</strong> {{ "%.2f"|format(result.results.metrics.building_percentage | default(0)) }}%
+                                        </div>
+                                        <div class="col-md-3">
+                                            <strong>Number of Buildings:</strong> {{ result.results.metrics.num_buildings | default('N/A') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/upload" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-upload me-2"></i>Process Another Image
+                    </a>
+                    <a href="/gallery" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-images me-2"></i>View Gallery
+                    </a>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Error State -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Processing Error
+                        </h4>
+                        <p>No results available. Please try processing your image again.</p>
+                        <hr>
+                        <a href="/upload" class="btn btn-outline-danger">
+                            <i class="fas fa-upload me-2"></i>Try Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Building Segmentation</h5>
+                    <p>Advanced AI-powered building detection and segmentation from aerial imagery.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light">Home</a></li>
+                        <li><a href="/upload" class="text-light">Upload</a></li>
+                        <li><a href="/gallery" class="text-light">Gallery</a></li>
+                        <li><a href="/about" class="text-light">About</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2024 Building Segmentation. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+
+        // Initialize tooltips
+        $(document).ready(function() {
+            var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+                return new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+        });
+    </script>
+</body>
+</html>

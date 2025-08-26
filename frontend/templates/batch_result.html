@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Batch Results - Building Segmentation</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+        }
+        .result-card {
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        .metrics-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 40px 0;
+            margin-top: 50px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-building me-2"></i>
+                Building Segmentation
+            </a>
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="fas fa-home me-1"></i>Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/upload">
+                            <i class="fas fa-upload me-1"></i>Upload
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/gallery">
+                            <i class="fas fa-images me-1"></i>Gallery
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="fas fa-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-5">
+        {% if result %}
+            <!-- Success Header -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="alert alert-success" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Batch Processing Complete!
+                        </h4>
+                        <p class="mb-0">
+                            Successfully processed <strong>{{ result.filenames | length }}</strong> files 
+                            on {{ result.upload_time.split('T')[0] if result.upload_time else 'Unknown' }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Batch Summary -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="metrics-card">
+                        <h3 class="text-center mb-4">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Batch Processing Summary
+                        </h3>
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <h4>{{ result.filenames | length }}</h4>
+                                <p>Files Processed</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h4>{{ result.status | default('Completed') }}</h4>
+                                <p>Processing Status</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h4>{{ result.request_id | default('N/A') }}</h4>
+                                <p>Batch ID</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File List -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="card result-card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-list me-2"></i>
+                                Processed Files
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Filename</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for filename in result.filenames %}
+                                        <tr>
+                                            <td>{{ loop.index }}</td>
+                                            <td>{{ filename }}</td>
+                                            <td>
+                                                <span class="badge bg-success">Processed</span>
+                                            </td>
+                                            <td>
+                                                <a href="#" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-eye me-1"></i>View
+                                                </a>
+                                                <a href="#" class="btn btn-sm btn-outline-success">
+                                                    <i class="fas fa-download me-1"></i>Download
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="row mt-4">
+                <div class="col-12 text-center">
+                    <a href="/upload" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-upload me-2"></i>Process More Files
+                    </a>
+                    <a href="/gallery" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-images me-2"></i>View Gallery
+                    </a>
+                </div>
+            </div>
+
+        {% else %}
+            <!-- Error State -->
+            <div class="row">
+                <div class="col-12">
+                    <div class="alert alert-danger" role="alert">
+                        <h4 class="alert-heading">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Batch Processing Error
+                        </h4>
+                        <p>No batch results available. Please try processing your files again.</p>
+                        <hr>
+                        <a href="/upload" class="btn btn-outline-danger">
+                            <i class="fas fa-upload me-2"></i>Try Again
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <h5>Building Segmentation</h5>
+                    <p>Advanced AI-powered building detection and segmentation from aerial imagery.</p>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/" class="text-light">Home</a></li>
+                        <li><a href="/upload" class="text-light">Upload</a></li>
+                        <li><a href="/gallery" class="text-light">Gallery</a></li>
+                        <li><a href="/about" class="text-light">About</a></li>
+                    </ul>
+                </div>
+            </div>
+            <hr class="my-4">
+            <div class="row">
+                <div class="col-12 text-center">
+                    <p class="mb-0">&copy; 2024 Building Segmentation. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <!-- Custom JavaScript -->
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    </script>
+</body>
+</html>

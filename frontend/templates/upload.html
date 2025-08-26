@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+
+{% block title %}Upload - Building Segmentation{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="text-center mb-5">
+                <h1 class="fw-bold">Upload Images</h1>
+                <p class="lead text-muted">Upload your aerial images for building segmentation analysis</p>
+            </div>
+            
+            <div class="card result-card">
+                <div class="card-body p-4">
+                    <form method="POST" enctype="multipart/form-data" id="uploadForm">
+                        <!-- File Upload Section -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Select Images</label>
+                            <div class="upload-area" id="uploadArea">
+                                <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                                <h5>Drag & Drop Images Here</h5>
+                                <p class="text-muted">or click to browse</p>
+                                <input type="file" name="files" multiple accept="image/*" class="form-control" id="fileInput" style="display: none;">
+                                <button type="button" class="btn btn-primary" onclick="document.getElementById('fileInput').click()">
+                                    <i class="fas fa-folder-open me-2"></i>Choose Files
+                                </button>
+                            </div>
+                            <div id="fileList" class="mt-3"></div>
+                        </div>
+                        
+                        <!-- Processing Parameters -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="threshold" class="form-label fw-bold">
+                                        Threshold
+                                        <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Prediction threshold for binary segmentation"></i>
+                                    </label>
+                                    <input type="range" class="form-range" id="threshold" name="threshold" min="0" max="1" step="0.1" value="0.5">
+                                    <div class="d-flex justify-content-between">
+                                        <small class="text-muted">0.0</small>
+                                        <small class="text-muted" id="thresholdValue">0.5</small>
+                                        <small class="text-muted">1.0</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="target_size" class="form-label fw-bold">
+                                        Target Size
+                                        <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Target image size for processing"></i>
+                                    </label>
+                                    <select class="form-select" id="target_size" name="target_size">
+                                        <option value="256,256">256x256</option>
+                                        <option value="512,512" selected>512x512</option>
+                                        <option value="1024,1024">1024x1024</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Post-Processing Options -->
+                        <div class="mb-4">
+                            <h5 class="fw-bold mb-3">Post-Processing Options</h5>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="apply_post_processing" name="apply_post_processing" checked>
+                                        <label class="form-check-label" for="apply_post_processing">
+                                            Apply Post-Processing
+                                        </label>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="morphological_kernel" class="form-label">
+                                            Morphological Kernel Size
+                                            <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Kernel size for morphological operations"></i>
+                                        </label>
+                                        <select class="form-select" id="morphological_kernel" name="morphological_kernel">
+                                            <option value="3" selected>3x3</option>
+                                            <option value="5">5x5</option>
+                                            <option value="7">7x7</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-3">
+                                        <label for="min_area" class="form-label">
+                                            Minimum Area
+                                            <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Minimum object area to keep"></i>
+                                        </label>
+                                        <input type="number" class="form-control" id="min_area" name="min_area" value="100" min="1">
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="smooth_kernel" class="form-label">
+                                            Smoothing Kernel Size
+                                            <i class="fas fa-info-circle text-muted" data-bs-toggle="tooltip" title="Kernel size for boundary smoothing"></i>
+                                        </label>
+                                        <select class="form-select" id="smooth_kernel" name="smooth_kernel">
+                                            <option value="3" selected>3x3</option>
+                                            <option value="5">5x5</option>
+                                            <option value="7">7x7</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="form-check form-switch mb-3">
+                                        <input class="form-check-input" type="checkbox" id="fill_holes" name="fill_holes" checked>
+                                        <label class="form-check-label" for="fill_holes">
+                                            Fill Holes
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Submit Button -->
+                        <div class="text-center">
+                            <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                <i class="fas fa-play me-2"></i>Start Processing
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Loading Indicator -->
+            <div class="loading text-center mt-4" id="loadingIndicator">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Processing your images...</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // File upload handling
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('fileInput');
+    const fileList = document.getElementById('fileList');
+    const thresholdSlider = document.getElementById('threshold');
+    const thresholdValue = document.getElementById('thresholdValue');
+    const submitBtn = document.getElementById('submitBtn');
+    const loadingIndicator = document.getElementById('loadingIndicator');
+    
+    // Update threshold value display
+    thresholdSlider.addEventListener('input', function() {
+        thresholdValue.textContent = this.value;
+    });
+    
+    // File input change handler
+    fileInput.addEventListener('change', function() {
+        handleFiles(this.files);
+    });
+    
+    // Drag and drop handlers
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+    
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+    
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+        handleFiles(e.dataTransfer.files);
+    });
+    
+    // Handle selected files
+    function handleFiles(files) {
+        fileList.innerHTML = '';
+        
+        if (files.length === 0) return;
+        
+        const fileArray = Array.from(files);
+        const validFiles = fileArray.filter(file => file.type.startsWith('image/'));
+        
+        if (validFiles.length === 0) {
+            showAlert('No valid image files selected', 'warning');
+            return;
+        }
+        
+        const fileListHtml = validFiles.map((file, index) => `
+            <div class="alert alert-success d-flex align-items-center">
+                <i class="fas fa-check-circle me-2"></i>
+                <div>
+                    <strong>${file.name}</strong>
+                    <br>
+                    <small class="text-muted">${(file.size / 1024 / 1024).toFixed(2)} MB</small>
+                </div>
+            </div>
+        `).join('');
+        
+        fileList.innerHTML = fileListHtml;
+        
+        // Update file input
+        const dt = new DataTransfer();
+        validFiles.forEach(file => dt.items.add(file));
+        fileInput.files = dt.files;
+    }
+    
+    // Form submission
+    document.getElementById('uploadForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (!fileInput.files || fileInput.files.length === 0) {
+            showAlert('Please select at least one image file', 'warning');
+            return;
+        }
+        
+        // Show loading
+        showLoading();
+        submitBtn.disabled = true;
+        
+        // Submit form
+        this.submit();
+    });
+    
+    // Show loading indicator
+    function showLoading() {
+        loadingIndicator.classList.add('show');
+        submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Processing...';
+    }
+</script>
+{% endblock %}
